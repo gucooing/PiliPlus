@@ -162,8 +162,8 @@ void main() async {
   } else if (PlatformUtils.isDesktop) {
     await windowManager.ensureInitialized();
 
-    final windowOptions = WindowOptions(
-      minimumSize: const Size(400, 720),
+    WindowOptions windowOptions = WindowOptions(
+      minimumSize: const Size(140, 140),
       skipTaskbar: false,
       titleBarStyle: Pref.showWindowTitleBar
           ? TitleBarStyle.normal
