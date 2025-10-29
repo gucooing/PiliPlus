@@ -267,6 +267,7 @@ class PlPlayerController {
       windowManager.setMinimumSize(const Size(400, 700)),
       windowManager.setBounds(_lastWindowBounds),
       windowManager.setAlwaysOnTop(false),
+      windowManager.setAspectRatio(0),
       setting.putAll({
         SettingBoxKey.windowSize: [
           _lastWindowBounds.width,
@@ -298,11 +299,13 @@ class PlPlayerController {
     } else {
       size = Size(280.0 * width / height, 280.0);
     }
+    final aspectRatio = width / height;
 
     await windowManager.setMinimumSize(size);
     windowManager
       ..setSize(size)
-      ..setAlwaysOnTop(true);
+      ..setAlwaysOnTop(true)
+      ..setAspectRatio(aspectRatio);
   }
 
   void toggleDesktopPip() {
