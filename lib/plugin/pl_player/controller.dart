@@ -224,8 +224,18 @@ class PlPlayerController with BlockConfigMixin {
         windowManager.setTitleBarStyle(TitleBarStyle.normal),
       windowManager.setMinimumSize(const Size(400, 700)),
       windowManager.setBounds(_lastWindowBounds),
-      setAlwaysOnTop(false),
+      windowManager.setAlwaysOnTop(false),
       windowManager.setAspectRatio(0),
+      setting.putAll({
+        SettingBoxKey.windowSize: [
+          _lastWindowBounds.width,
+          _lastWindowBounds.height,
+        ],
+        SettingBoxKey.windowPosition: [
+          _lastWindowBounds.left,
+          _lastWindowBounds.top,
+        ],
+      }),
     ]);
   }
 
@@ -255,12 +265,14 @@ class PlPlayerController with BlockConfigMixin {
     } else {
       size = Size(280.0 * width / height, 280.0);
     }
+    final aspectRatio = width / height;
 
     await windowManager.setMinimumSize(size);
     setAlwaysOnTop(true);
     windowManager
       ..setSize(size)
-      ..setAspectRatio(width / height);
+      ..setAlwaysOnTop(true)
+      ..setAspectRatio(aspectRatio);
   }
 
   void toggleDesktopPip() {
