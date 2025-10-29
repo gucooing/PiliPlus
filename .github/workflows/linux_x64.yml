@@ -49,7 +49,7 @@ jobs:
 
       - name: Set and Extract version
         shell: pwsh
-        run: lib/scripts/build.ps1
+        run: lib/scripts/build.ps1 linux
 
         #TODO: deb and rpm packages need to be build
       - name: Build Linux
