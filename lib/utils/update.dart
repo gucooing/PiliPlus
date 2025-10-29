@@ -36,7 +36,7 @@ abstract class Update {
         return;
       }
       int latest =
-          DateTime.parse(res.data[0]['created_at']).millisecondsSinceEpoch ~/
+          DateTime.parse(res.data[0]['updated_at']).millisecondsSinceEpoch ~/
           1000;
       if (BuildConfig.buildTime >= latest) {
         if (!isAuto) {
