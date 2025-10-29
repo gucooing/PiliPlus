@@ -295,13 +295,13 @@ class PlPlayerController {
     final width = state.width ?? this.width ?? 16;
     final height = state.height ?? this.height ?? 9;
     if (height > width) {
-      size = Size(140.0, 140.0 * height / width);
+      size = Size(280.0, 280.0 * height / width);
     } else {
-      size = Size(140.0 * width / height, 140.0);
+      size = Size(280.0 * width / height, 280.0);
     }
     final aspectRatio = width / height;
 
-    await windowManager.setMinimumSize(size);
+    await windowManager.setMinimumSize(const Size(140, 140));
     windowManager
       ..setSize(size)
       ..setAlwaysOnTop(true)
