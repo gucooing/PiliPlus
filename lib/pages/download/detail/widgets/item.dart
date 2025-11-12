@@ -76,6 +76,8 @@ class DetailItem extends StatelessWidget {
                   );
                   if (res) {
                     SmartDialog.showToast('更新成功');
+                  } else {
+                    SmartDialog.showToast('更新失败');
                   }
                 },
                 dense: true,

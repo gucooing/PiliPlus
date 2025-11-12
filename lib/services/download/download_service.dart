@@ -315,10 +315,9 @@ class DownloadService extends GetxService {
 
         final danmaku = res.removeAt(0).data;
         for (var i in res) {
-          if (!i.isSuccess) {
-            throw i.toString();
+          if (i.isSuccess) {
+            danmaku.elems.addAll(i.data.elems);
           }
-          danmaku.elems.addAll(i.data.elems);
         }
         res.clear();
         await danmakuFile.writeAsBytes(danmaku.writeToBuffer());
