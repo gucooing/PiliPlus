@@ -214,6 +214,9 @@ class _LiveRoomPageState extends State<LiveRoomPage>
     Alignment alignment = Alignment.center,
     bool needDm = true,
   }) {
+    if (!plPlayerController.isLive) {
+      return const SizedBox.shrink();
+    }
     if (!isFullScreen && !plPlayerController.isDesktopPip) {
       _liveRoomController.fsSC.value = null;
     }
@@ -230,11 +233,13 @@ class _LiveRoomPageState extends State<LiveRoomPage>
             alignment: alignment,
             plPlayerController: plPlayerController,
             headerControl: LiveHeaderControl(
+              key: _liveRoomController.headerKey,
               title: roomInfoH5?.roomInfo?.title,
               upName: roomInfoH5?.anchorInfo?.baseInfo?.uname,
               plPlayerController: plPlayerController,
               onSendDanmaku: _liveRoomController.onSendDanmaku,
               onPlayAudio: _liveRoomController.queryLiveUrl,
+              isPortrait: isPortrait,
             ),
             bottomControl: BottomControl(
               plPlayerController: plPlayerController,
@@ -342,6 +347,10 @@ class _LiveRoomPageState extends State<LiveRoomPage>
     return PopScope(
       canPop: !isFullScreen,
       onPopInvokedWithResult: (bool didPop, Object? result) {
+        if (plPlayerController.controlsLock.value) {
+          plPlayerController.onLockControl(false);
+          return;
+        }
         if (isFullScreen) {
           plPlayerController.triggerFullScreen(status: false);
         }

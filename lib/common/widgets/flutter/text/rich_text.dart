@@ -1,4 +1,8 @@
-import 'dart:ui' as ui;
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'dart:ui' as ui show TextHeightBehavior;
 
 import 'package:PiliPlus/common/widgets/flutter/text/paragraph.dart';
 import 'package:flutter/material.dart';
@@ -260,7 +264,7 @@ class RichText extends MultiChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, RenderParagraph renderObject) {
     assert(textDirection != null || debugCheckHasDirectionality(context));
     renderObject
-      ..text = text
+      ..text = (text: text, primary: primary)
       ..textAlign = textAlign
       ..textDirection = textDirection ?? Directionality.of(context)
       ..softWrap = softWrap
@@ -273,75 +277,75 @@ class RichText extends MultiChildRenderObjectWidget {
       ..locale = locale ?? Localizations.maybeLocaleOf(context)
       ..registrar = selectionRegistrar
       ..selectionColor = selectionColor
-      ..primary = primary
       ..onShowMore = onShowMore;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(
-      EnumProperty<TextAlign>(
-        'textAlign',
-        textAlign,
-        defaultValue: TextAlign.start,
-      ),
-    );
-    properties.add(
-      EnumProperty<TextDirection>(
-        'textDirection',
-        textDirection,
-        defaultValue: null,
-      ),
-    );
-    properties.add(
-      FlagProperty(
-        'softWrap',
-        value: softWrap,
-        ifTrue: 'wrapping at box width',
-        ifFalse: 'no wrapping except at line break characters',
-        showName: true,
-      ),
-    );
-    properties.add(
-      EnumProperty<TextOverflow>(
-        'overflow',
-        overflow,
-        defaultValue: TextOverflow.clip,
-      ),
-    );
-    properties.add(
-      DiagnosticsProperty<TextScaler>(
-        'textScaler',
-        textScaler,
-        defaultValue: TextScaler.noScaling,
-      ),
-    );
-    properties.add(IntProperty('maxLines', maxLines, ifNull: 'unlimited'));
-    properties.add(
-      EnumProperty<TextWidthBasis>(
-        'textWidthBasis',
-        textWidthBasis,
-        defaultValue: TextWidthBasis.parent,
-      ),
-    );
-    properties.add(StringProperty('text', text.toPlainText()));
-    properties.add(
-      DiagnosticsProperty<Locale>('locale', locale, defaultValue: null),
-    );
-    properties.add(
-      DiagnosticsProperty<StrutStyle>(
-        'strutStyle',
-        strutStyle,
-        defaultValue: null,
-      ),
-    );
-    properties.add(
-      DiagnosticsProperty<TextHeightBehavior>(
-        'textHeightBehavior',
-        textHeightBehavior,
-        defaultValue: null,
-      ),
-    );
+    properties
+      ..add(
+        EnumProperty<TextAlign>(
+          'textAlign',
+          textAlign,
+          defaultValue: TextAlign.start,
+        ),
+      )
+      ..add(
+        EnumProperty<TextDirection>(
+          'textDirection',
+          textDirection,
+          defaultValue: null,
+        ),
+      )
+      ..add(
+        FlagProperty(
+          'softWrap',
+          value: softWrap,
+          ifTrue: 'wrapping at box width',
+          ifFalse: 'no wrapping except at line break characters',
+          showName: true,
+        ),
+      )
+      ..add(
+        EnumProperty<TextOverflow>(
+          'overflow',
+          overflow,
+          defaultValue: TextOverflow.clip,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty<TextScaler>(
+          'textScaler',
+          textScaler,
+          defaultValue: TextScaler.noScaling,
+        ),
+      )
+      ..add(IntProperty('maxLines', maxLines, ifNull: 'unlimited'))
+      ..add(
+        EnumProperty<TextWidthBasis>(
+          'textWidthBasis',
+          textWidthBasis,
+          defaultValue: TextWidthBasis.parent,
+        ),
+      )
+      ..add(StringProperty('text', text.toPlainText()))
+      ..add(
+        DiagnosticsProperty<Locale>('locale', locale, defaultValue: null),
+      )
+      ..add(
+        DiagnosticsProperty<StrutStyle>(
+          'strutStyle',
+          strutStyle,
+          defaultValue: null,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty<TextHeightBehavior>(
+          'textHeightBehavior',
+          textHeightBehavior,
+          defaultValue: null,
+        ),
+      );
   }
 }

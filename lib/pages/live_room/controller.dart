@@ -14,6 +14,7 @@ import 'package:PiliPlus/models_new/live/live_room_play_info/codec.dart';
 import 'package:PiliPlus/models_new/live/live_superchat/item.dart';
 import 'package:PiliPlus/pages/danmaku/dnamaku_model.dart';
 import 'package:PiliPlus/pages/live_room/send_danmaku/view.dart';
+import 'package:PiliPlus/pages/video/widgets/header_control.dart';
 import 'package:PiliPlus/plugin/pl_player/controller.dart';
 import 'package:PiliPlus/plugin/pl_player/models/data_source.dart';
 import 'package:PiliPlus/services/service_locator.dart';
@@ -26,7 +27,6 @@ import 'package:PiliPlus/utils/utils.dart';
 import 'package:PiliPlus/utils/video_utils.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:easy_debounce/easy_throttle.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
@@ -88,6 +88,8 @@ class LiveRoomController extends GetxController {
   late bool isFullScreen = false;
 
   final showSuperChat = Pref.showSuperChat;
+
+  final headerKey = GlobalKey<TimeBatteryMixin>();
 
   @override
   void onInit() {
@@ -229,6 +231,7 @@ class LiveRoomController extends GetxController {
     _msgStream = null;
   }
 
+  @pragma('vm:notify-debugger-on-exception')
   Future<void> prefetch() async {
     final res = await LiveHttp.liveRoomDanmaPrefetch(roomId: roomId);
     if (res['status']) {
@@ -238,9 +241,7 @@ class LiveRoomController extends GetxController {
             list.cast<Map<String, dynamic>>().map(DanmakuMsg.fromPrefetch),
           );
           WidgetsBinding.instance.addPostFrameCallback(scrollToBottom);
-        } catch (e) {
-          if (kDebugMode) debugPrint(e.toString());
-        }
+        } catch (_) {}
       }
     }
   }
@@ -337,6 +338,7 @@ class LiveRoomController extends GetxController {
           ..init();
   }
 
+  @pragma('vm:notify-debugger-on-exception')
   void _danmakuListener(dynamic obj) {
     try {
       // logger.i(' 原始弹幕消息 ======> ${jsonEncode(obj)}');
@@ -407,9 +409,7 @@ class LiveRoomController extends GetxController {
           }
           break;
       }
-    } catch (_) {
-      if (kDebugMode) rethrow;
-    }
+    } catch (_) {}
   }
 
   final RxInt likeClickTime = 0.obs;

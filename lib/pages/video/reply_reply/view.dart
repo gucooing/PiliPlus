@@ -1,7 +1,7 @@
 import 'package:PiliPlus/common/skeleton/video_reply.dart';
 import 'package:PiliPlus/common/widgets/custom_sliver_persistent_header_delegate.dart';
+import 'package:PiliPlus/common/widgets/flutter/refresh_indicator.dart';
 import 'package:PiliPlus/common/widgets/loading_widget/http_error.dart';
-import 'package:PiliPlus/common/widgets/refresh_indicator.dart';
 import 'package:PiliPlus/common/widgets/view_safe_area.dart';
 import 'package:PiliPlus/grpc/bilibili/main/community/reply/v1.pb.dart'
     show ReplyInfo, Mode;
@@ -188,7 +188,8 @@ class _VideoReplyReplyPanelState extends State<VideoReplyReplyPanel>
             : const AlwaysScrollableScrollPhysics(),
         slivers: [
           if (!isDialogue) ...[
-            if (widget.firstFloor case final firstFloor?)
+            if ((widget.firstFloor ?? _controller.firstFloor.value)
+                case final firstFloor?)
               _header(theme, firstFloor)
             else
               Obx(() {

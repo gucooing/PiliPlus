@@ -406,7 +406,6 @@ class PlPlayerController {
       .where((item) => item.second != SkipType.disable)
       .map((item) => item.first.name)
       .toSet();
-  late final blockServer = Pref.blockServer;
 
   // settings
   late final showFSActionItem = Pref.showFSActionItem;
@@ -840,10 +839,7 @@ class PlPlayerController {
       if (isAnim) {
         setShader(superResolutionType.value, pp);
       }
-      await pp.setProperty(
-        "af",
-        "scaletempo2=max-speed=8",
-      );
+      await pp.setProperty("af", "scaletempo2=max-speed=8");
       if (Platform.isAndroid) {
         await pp.setProperty("volume-max", "100");
         String ao = Pref.useOpenSLES
@@ -858,6 +854,16 @@ class PlPlayerController {
       // await pp.setProperty("gpu-context", "android");
       // await pp.setProperty("gpu-api", "opengl");
       await player.setAudioTrack(AudioTrack.auto());
+      if (Pref.enableSystemProxy) {
+        final systemProxyHost = Pref.systemProxyHost;
+        final systemProxyPort = int.tryParse(Pref.systemProxyPort);
+        if (systemProxyPort != null && systemProxyHost.isNotEmpty) {
+          await pp.setProperty(
+            "http-proxy",
+            'http://$systemProxyHost:$systemProxyPort',
+          );
+        }
+      }
     }
 
     // 音轨
@@ -1446,10 +1452,6 @@ class PlPlayerController {
     if (visible) {
       hideTaskControls();
     }
-  }
-
-  void hiddenControls(bool val) {
-    showControls.value = val;
   }
 
   Timer? longPressTimer;
