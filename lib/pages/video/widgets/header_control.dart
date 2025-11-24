@@ -61,9 +61,15 @@ import 'package:intl/intl.dart' show DateFormat;
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
 mixin TimeBatteryMixin<T extends StatefulWidget> on State<T> {
+  PlPlayerController get plPlayerController;
+  late final titleKey = GlobalKey();
   ContextSingleTicker? provider;
-  ContextSingleTicker get effectiveProvider =>
-      provider ??= ContextSingleTicker(context, autoStart: false);
+  ContextSingleTicker get effectiveProvider => provider ??= ContextSingleTicker(
+    context,
+    autoStart: () =>
+        plPlayerController.showControls.value &&
+        !plPlayerController.controlsLock.value,
+  );
 
   bool get isPortrait;
   bool get isFullScreen;
@@ -102,10 +108,7 @@ mixin TimeBatteryMixin<T extends StatefulWidget> on State<T> {
   bool _showCurrTime = false;
   void showCurrTimeIfNeeded(bool isFullScreen) {
     _showCurrTime = !isPortrait && (isFullScreen || !horizontalScreen);
-    if (_showCurrTime) {
-      now.value = _format.format(DateTime.now());
-      getBatteryLevelIfNeeded();
-    } else {
+    if (!_showCurrTime) {
       stopClock();
     }
   }
@@ -1420,7 +1423,10 @@ class HeaderControlState extends State<HeaderControl>
         return AlertDialog(
           title: const Text('播放信息'),
           contentPadding: const EdgeInsets.only(top: 16),
-          constraints: const BoxConstraints(maxWidth: 425),
+          constraints: const BoxConstraints(
+            minWidth: 280,
+            maxWidth: 425,
+          ),
           content: Material(
             type: MaterialType.transparency,
             child: ListTileTheme(
@@ -2449,6 +2455,7 @@ class HeaderControlState extends State<HeaderControl>
                   videoDetail.title!;
             }
             return MarqueeText(
+              key: titleKey,
               title,
               spacing: 30,
               velocity: 30,
@@ -2581,7 +2588,7 @@ class HeaderControlState extends State<HeaderControl>
                     ),
                   ),
                 ],
-                if (plPlayerController.enableSponsorBlock == true)
+                if (plPlayerController.enableSponsorBlock)
                   SizedBox(
                     width: 42,
                     height: 34,
