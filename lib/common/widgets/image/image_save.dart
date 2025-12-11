@@ -14,7 +14,7 @@ void imageSaveDialog({
   dynamic aid,
   String? bvid,
 }) {
-  final double imgWidth = Get.mediaQuery.size.shortestSide - 8 * 2;
+  final double imgWidth = MediaQuery.sizeOf(Get.context!).shortestSide - 8 * 2;
   SmartDialog.show(
     animationType: SmartAnimationType.centerScale_otherSlide,
     builder: (context) {
@@ -104,13 +104,13 @@ void imageSaveDialog({
                       },
                       icon: const Icon(Icons.watch_later_outlined),
                     ),
-                  if (cover?.isNotEmpty == true) ...[
+                  if (cover != null && cover.isNotEmpty) ...[
                     if (Utils.isMobile)
                       iconBtn(
                         tooltip: '分享',
                         onPressed: () {
                           SmartDialog.dismiss();
-                          ImageUtils.onShareImg(cover!);
+                          ImageUtils.onShareImg(cover);
                         },
                         icon: const Icon(Icons.share),
                       ),
@@ -119,7 +119,7 @@ void imageSaveDialog({
                       onPressed: () async {
                         bool saveStatus = await ImageUtils.downloadImg(
                           context,
-                          [cover!],
+                          [cover],
                         );
                         if (saveStatus) {
                           SmartDialog.dismiss();

@@ -75,15 +75,16 @@ class _BlackListPageState extends State<BlackListPage> {
         itemBuilder: (context, index) => const MsgFeedTopSkeleton(),
       ),
       Success(:var response) =>
-        response?.isNotEmpty == true
+        response != null && response.isNotEmpty
             ? SliverList.builder(
-                itemCount: response!.length,
+                itemCount: response.length,
                 itemBuilder: (BuildContext context, int index) {
                   if (index == response.length - 1) {
                     _blackListController.onLoadMore();
                   }
                   final item = response[index];
                   return ListTile(
+                    visualDensity: .standard,
                     onTap: () => Get.toNamed('/member?mid=${item.mid}'),
                     leading: NetworkImgLayer(
                       width: 45,
