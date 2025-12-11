@@ -1144,18 +1144,19 @@ List<SettingsModel> get extraSettings => [
       }
     },
   ),
-  SettingsModel(
-    settingsType: SettingsType.normal,
+  NormalModel(
     title: '设置港澳台代理',
+    leading: const Icon(Icons.sailing_rounded),
     getSubtitle: () {
       final url = Pref.apiHKUrl;
-      return '当前港澳台代理: 「${url == '' ? '不代理' : Pref.apiHKUrl}」';
+      return '当前港澳台代理配置: 「${url == '' ? '不代理' : Pref.apiHKUrl}」';
     },
-    onTap: (setState) {
+
+    onTap: (context,setState) {
       showDialog(
-        context: Get.context!,
+        context: context,
         builder: (context) {
-          String valueStr = '';
+          String valueStr = Pref.apiHKUrl;
           return AlertDialog(
             title: const Text('港澳台代理链接'),
             content: TextField(
@@ -1206,7 +1207,6 @@ List<SettingsModel> get extraSettings => [
         },
       );
     },
-    leading: const Icon(Icons.sailing_rounded),
   ),
 ];
 
