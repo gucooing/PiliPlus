@@ -127,8 +127,8 @@ class PgcController
       } else if (followState.value case Success(:final response)) {
         final currentList = response!..addAll(list);
         if (currentList.length >= followCount.value) {
-          followEnd = true;
-        }
+        followEnd = true;
+      }
         followState.refresh();
       }
       followPage++;
@@ -138,6 +138,7 @@ class PgcController
     followLoading = false;
   }
   
+  @override
   Future<LoadingState<List<PgcIndexItem>?>> customGetData() async {
     String apiUrl = Api.pgcIndexResult;
     if (tabType == HomeTabType.hk_bangumi) {
