@@ -10,14 +10,17 @@ import 'package:PiliPlus/pages/common/common_list_controller.dart';
 import 'package:PiliPlus/services/account_service.dart';
 import 'package:PiliPlus/utils/extension/scroll_controller_ext.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart' show ScrollController;
 import 'package:get/get.dart';
 
 class PgcController
     extends CommonListController<List<PgcIndexItem>?, PgcIndexItem>
     with AccountMixin {
-  PgcController({required this.tabType});
+  PgcController({required this.tabType})
+    : indexType = tabType == HomeTabType.cinema ? 102 : null;
+
   final HomeTabType tabType;
+  final int? indexType;
 
   late final showPgcTimeline =
       (tabType == HomeTabType.bangumi || tabType == HomeTabType.hk_bangumi)
@@ -34,9 +37,6 @@ class PgcController
     queryPgcFollow();
     if (showPgcTimeline) {
       queryPgcTimeline();
-    }
-    if (accountService.isLogin.value) {
-      followController = ScrollController();
     }
   }
 
@@ -64,7 +64,7 @@ class PgcController
   late bool followEnd = false;
   late Rx<LoadingState<List<FavPgcItemModel>?>> followState =
       LoadingState<List<FavPgcItemModel>?>.loading().obs;
-  ScrollController? followController;
+  final followController = ScrollController();
 
   // timeline
   late Rx<LoadingState<List<TimelineResult>?>> timelineState =
@@ -123,7 +123,7 @@ class PgcController
           followEnd = true;
         }
         followState.value = Success(list);
-        followController?.animToTop();
+        followController.jumpToTop();
       } else if (followState.value case Success(:final response)) {
         final currentList = response!..addAll(list);
         if (currentList.length >= followCount.value) {
@@ -137,8 +137,7 @@ class PgcController
     }
     followLoading = false;
   }
-
-  @override
+  
   Future<LoadingState<List<PgcIndexItem>?>> customGetData() async {
     String apiUrl = Api.pgcIndexResult;
     if (tabType == HomeTabType.hk_bangumi) {
@@ -150,17 +149,14 @@ class PgcController
 
     return PgcHttp.pgcIndex(
       page: page,
-      indexType: tabType == HomeTabType.cinema ? 102 : null,
+      indexType: indexType,
       apiUrl: apiUrl,
     );
   }
 
-
-
-
   @override
   void onClose() {
-    followController?.dispose();
+    followController.dispose();
     super.onClose();
   }
 

@@ -17,11 +17,11 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
 # update when release
-version: 1.1.6+1
+version: 2.0.0+1
 
 environment:
   sdk: ">=3.10.0"
-  flutter: 3.38.6 # update `.fvmrc` config
+  flutter: 3.41.3 # update `.fvmrc` config
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -250,32 +250,32 @@ dependency_overrides:
   rxdart: ^0.28.0
   media_kit:
     git:
-      url: https://github.com/bggRGjQaUbCoE/media-kit.git
+      url: https://github.com/My-Responsitories/media-kit.git
       path: media_kit
       ref: version_1.2.5
   media_kit_video:
     git:
-      url: https://github.com/bggRGjQaUbCoE/media-kit.git
+      url: https://github.com/My-Responsitories/media-kit.git
       path: media_kit_video
       ref: version_1.2.5
   media_kit_libs_video:
     git:
-      url: https://github.com/bggRGjQaUbCoE/media-kit.git
+      url: https://github.com/My-Responsitories/media-kit.git
       path: libs/universal/media_kit_libs_video
       ref: version_1.2.5
   media_kit_native_event_loop:
     git:
-      url: https://github.com/bggRGjQaUbCoE/media-kit.git
+      url: https://github.com/My-Responsitories/media-kit.git
       path: media_kit_native_event_loop
       ref: version_1.2.5
   media_kit_libs_android_video:
     git:
-      url: https://github.com/bggRGjQaUbCoE/media-kit.git
+      url: https://github.com/My-Responsitories/media-kit.git
       path: libs/android/media_kit_libs_android_video
       ref: version_1.2.5
   media_kit_libs_windows_video:
     git:
-      url: https://github.com/bggRGjQaUbCoE/media-kit.git
+      url: https://github.com/My-Responsitories/media-kit.git
       path: libs/windows/media_kit_libs_windows_video
       ref: version_1.2.5
   font_awesome_flutter: 10.9.0
@@ -330,13 +330,17 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/images/
-    - assets/images/lv/
-    - assets/images/logo/
-    - assets/images/live/
-    - assets/images/video/
-    - assets/images/paycoins/
-    - assets/shaders/
+    - path: assets/images/
+    - path: assets/images/lv/
+    - path: assets/images/logo/
+    - path: assets/images/logo/ico/
+      platforms: [windows]
+    - path: assets/images/logo/desktop/
+      platforms: [linux, macos]
+    - path: assets/images/live/
+    - path: assets/images/video/
+    - path: assets/images/paycoins/
+    - path: assets/shaders/
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
 
