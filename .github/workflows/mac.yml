@@ -30,6 +30,17 @@ jobs:
         shell: pwsh
         run: lib/scripts/build.ps1
 
+      - name: pick tooltip fix
+        working-directory: ${{ env.FLUTTER_ROOT }}
+        run: |
+          git config --global user.name "ci"
+          git config --global user.email "example@example.com"
+          git stash || true
+          git cherry-pick 56956c33ef102ac0b5fc46b62bd2dd9f50a86616 --no-edit
+          git reset --soft HEAD~1
+          git stash pop || true
+        continue-on-error: true
+
       - name: apply modal barrier patch
         working-directory: ${{ env.FLUTTER_ROOT }}
         run: git apply $GITHUB_WORKSPACE/lib/scripts/modal_barrier_patch.diff || true

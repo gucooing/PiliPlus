@@ -67,6 +67,9 @@ abstract final class Constants {
 
   static const goodsUrlPrefix = "https://gaoneng.bilibili.com/tetris";
 
+  // 'itemOpusStyle,opusBigCover,onlyfansVote,endFooterHidden,decorationCard,onlyfansAssetsV2,ugcDelete,onlyfansQaCard,editable,opusPrivateVisible,avatarAutoTheme,sunflowerStyle,cardsEnhance,eva3CardOpus,eva3CardVideo,eva3CardComment,eva3CardVote,eva3CardUser'
+  static const dynFeatures = 'itemOpusStyle,listOnlyfans,onlyfansQaCard';
+
   // 超分辨率滤镜
   static const List<String> mpvAnime4KShaders = [
     'Anime4K_Clamp_Highlights.glsl',

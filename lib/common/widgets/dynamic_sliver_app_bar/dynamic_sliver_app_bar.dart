@@ -60,7 +60,6 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     required this.forceMaterialTransparency,
     required this.useDefaultSemanticsOrder,
     required this.clipBehavior,
-    required this.accessibleNavigation,
     required this.actionsPadding,
   }) : assert(primary || topPadding == 0.0),
        _bottomHeight = bottom?.preferredSize.height ?? 0.0;
@@ -97,7 +96,6 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   final bool forceMaterialTransparency;
   final bool useDefaultSemanticsOrder;
   final Clip? clipBehavior;
-  final bool accessibleNavigation;
   final EdgeInsetsGeometry? actionsPadding;
 
   @override
@@ -192,7 +190,6 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         systemOverlayStyle != oldDelegate.systemOverlayStyle ||
         forceMaterialTransparency != oldDelegate.forceMaterialTransparency ||
         useDefaultSemanticsOrder != oldDelegate.useDefaultSemanticsOrder ||
-        accessibleNavigation != oldDelegate.accessibleNavigation ||
         actionsPadding != oldDelegate.actionsPadding;
   }
 
@@ -348,7 +345,6 @@ class _DynamicSliverAppBarState extends State<DynamicSliverAppBar> {
           forceMaterialTransparency: widget.forceMaterialTransparency,
           useDefaultSemanticsOrder: widget.useDefaultSemanticsOrder,
           clipBehavior: widget.clipBehavior,
-          accessibleNavigation: MediaQuery.of(context).accessibleNavigation,
           actionsPadding: widget.actionsPadding,
         ),
       ),

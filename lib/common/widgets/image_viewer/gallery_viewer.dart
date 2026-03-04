@@ -403,8 +403,12 @@ class _GalleryViewerState extends State<GalleryViewer>
                 return child;
               } else {
                 return Image(
-                  image: CachedNetworkImageProvider(
-                    ImageUtils.thumbnailUrl(item.url, widget.quality),
+                  image: ResizeImage.resizeIfNeeded(
+                    _containerSize.width.cacheSize(context),
+                    null,
+                    CachedNetworkImageProvider(
+                      ImageUtils.thumbnailUrl(item.url, widget.quality),
+                    ),
                   ),
                   minScale: widget.minScale,
                   maxScale: widget.maxScale,

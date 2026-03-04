@@ -112,6 +112,8 @@ Widget module(
       );
     // 活动
     case 'DYNAMIC_TYPE_COMMON_SQUARE':
+      final common = major?.common ?? major?.upowerCommon;
+      if (common == null) return const SizedBox.shrink();
       return Material(
         color: floor == 1
             ? theme.dividerColor.withValues(alpha: 0.08)
@@ -123,7 +125,7 @@ Widget module(
           borderRadius: floor == 1 ? null : StyleString.mdRadius,
           onTap: () {
             try {
-              String url = major.common!.jumpUrl!;
+              String url = common.jumpUrl!;
               if (url.contains('bangumi/play') &&
                   PageUtils.viewPgcFromUri(url)) {
                 return;
@@ -141,14 +143,7 @@ Widget module(
             child: Row(
               spacing: 10,
               children: [
-                if (item
-                        .modules
-                        .moduleDynamic!
-                        .major!
-                        .common!
-                        .cover
-                        ?.isNotEmpty ==
-                    true)
+                if (common.cover?.isNotEmpty ?? false)
                   ClipRRect(
                     borderRadius: const BorderRadius.all(Radius.circular(6)),
                     child: CachedNetworkImage(
@@ -156,9 +151,7 @@ Widget module(
                       height: 45,
                       fit: BoxFit.cover,
                       memCacheWidth: 45.cacheSize(context),
-                      imageUrl: ImageUtils.safeThumbnailUrl(
-                        item.modules.moduleDynamic!.major!.common!.cover,
-                      ),
+                      imageUrl: ImageUtils.safeThumbnailUrl(common.cover),
                     ),
                   ),
                 Expanded(
@@ -166,22 +159,16 @@ Widget module(
                     spacing: 2,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        major!.common!.title!,
-                        style: TextStyle(color: theme.colorScheme.primary),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      if (item
-                              .modules
-                              .moduleDynamic!
-                              .major!
-                              .common!
-                              .desc
-                              ?.isNotEmpty ==
-                          true)
+                      if (common.title?.isNotEmpty ?? false)
                         Text(
-                          major.common!.desc!,
+                          common.title!,
+                          style: TextStyle(color: theme.colorScheme.primary),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      if (common.desc?.isNotEmpty ?? false)
+                        Text(
+                          common.desc!,
                           style: TextStyle(
                             color: theme.colorScheme.outline,
                             fontSize: theme.textTheme.labelMedium!.fontSize,

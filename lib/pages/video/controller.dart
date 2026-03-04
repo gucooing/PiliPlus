@@ -635,7 +635,6 @@ class VideoDetailController extends GetxController
     _autoPlay.value = true;
     playedTime = plPlayerController.position;
     plPlayerController
-      ..removeListeners()
       ..isBuffering.value = false
       ..buffered.value = Duration.zero;
 
