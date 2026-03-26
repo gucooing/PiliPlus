@@ -4,8 +4,8 @@ import 'dart:io';
 
 import 'package:PiliPlus/http/api.dart';
 import 'package:PiliPlus/http/constants.dart';
+import 'package:PiliPlus/http/hk_api.dart';
 import 'package:PiliPlus/http/loading_state.dart';
-import 'package:PiliPlus/http/hk_api_retry_interceptor.dart';
 import 'package:PiliPlus/http/retry_interceptor.dart';
 import 'package:PiliPlus/http/user.dart';
 import 'package:PiliPlus/utils/accounts.dart';
@@ -193,7 +193,7 @@ class Request {
       );
     }
     // 港澳台支持
-    dio.interceptors.add(HkApiRetryInterceptor());
+    dio.interceptors.add(HkApiRetryInterceptor(dio));
 
     // 日志拦截器 输出请求、响应内容
     if (kDebugMode) {
@@ -221,23 +221,18 @@ class Request {
     Map<String, dynamic>? queryParameters,
     Options? options,
     CancelToken? cancelToken,
-  }) async {
-    try {
-      return await dio.get<T>(
+    String? baseUrl,
+  }) {
+    return send<T>(
+      composeRequestOptions(
         url,
+        method: 'GET',
         queryParameters: queryParameters,
         options: options,
         cancelToken: cancelToken,
-      );
-    } on DioException catch (e) {
-      return Response(
-        data: {
-          'message': await AccountManager.dioError(e),
-        }, // 将自定义 Map 数据赋值给 Response 的 data 属性
-        statusCode: e.response?.statusCode ?? -1,
-        requestOptions: e.requestOptions,
-      );
-    }
+        baseUrl: baseUrl,
+      ),
+    );
   }
 
   /*
@@ -249,22 +244,59 @@ class Request {
     Map<String, dynamic>? queryParameters,
     Options? options,
     CancelToken? cancelToken,
-  }) async {
-    // if (kDebugMode) debugPrint('post-data: $data');
-    try {
-      return await dio.post<T>(
+    String? baseUrl,
+  }) {
+    return send<T>(
+      composeRequestOptions(
         url,
+        method: 'POST',
         data: data,
         queryParameters: queryParameters,
         options: options,
         cancelToken: cancelToken,
-      );
+        baseUrl: baseUrl,
+      ),
+      toastOnError: true,
+    );
+  }
+
+  static RequestOptions composeRequestOptions(
+    String path, {
+    required String method,
+    Object? data,
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+    CancelToken? cancelToken,
+    String? baseUrl,
+  }) {
+    return (options ?? Options())
+        .copyWith(method: options?.method ?? method)
+        .compose(
+          baseUrl == null
+              ? dio.options
+              : dio.options.copyWith(baseUrl: baseUrl),
+          path,
+          data: data,
+          queryParameters: queryParameters,
+          cancelToken: cancelToken,
+          sourceStackTrace: StackTrace.current,
+        );
+  }
+
+  static Future<Response> send<T>(
+    RequestOptions requestOptions, {
+    bool toastOnError = false,
+  }) async {
+    try {
+      return await dio.fetch<T>(requestOptions);
     } on DioException catch (e) {
-      AccountManager.toast(e);
+      if (toastOnError) {
+        AccountManager.toast(e);
+      }
       return Response(
         data: {
           'message': await AccountManager.dioError(e),
-        }, // 将自定义 Map 数据赋值给 Response 的 data 属性
+        },
         statusCode: e.response?.statusCode ?? -1,
         requestOptions: e.requestOptions,
       );

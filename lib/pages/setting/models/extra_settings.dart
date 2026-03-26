@@ -8,8 +8,10 @@ import 'package:PiliPlus/common/widgets/gesture/horizontal_drag_gesture_recogniz
 import 'package:PiliPlus/common/widgets/image_grid/image_grid_view.dart'
     show ImageGridView, ImageModel;
 import 'package:PiliPlus/common/widgets/pendant_avatar.dart';
+import 'package:PiliPlus/common/widgets/stateful_builder.dart';
 import 'package:PiliPlus/grpc/reply.dart';
 import 'package:PiliPlus/http/fav.dart';
+import 'package:PiliPlus/http/hk_api.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/models/common/audio_normalization.dart';
 import 'package:PiliPlus/models/common/dynamic/dynamics_type.dart';
@@ -43,7 +45,7 @@ import 'package:PiliPlus/utils/update.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
-import 'package:flutter/material.dart' hide RefreshIndicator;
+import 'package:flutter/material.dart' hide RefreshIndicator, StatefulBuilder;
 import 'package:flutter/services.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -658,63 +660,147 @@ List<SettingsModel> get extraSettings => [
       return '当前港澳台代理配置: 「${url == '' ? '不代理' : Pref.apiHKUrl}」';
     },
 
-    onTap: (context,setState) {
+    onTap: (context, setState) {
       showDialog(
         context: context,
         builder: (context) {
-          String valueStr = Pref.apiHKUrl;
-          return AlertDialog(
-            title: const Text('港澳台代理链接'),
-            content: TextField(
-              autofocus: true,
-              onChanged: (value) => valueStr = value,
-              keyboardType: TextInputType.url,
-              decoration: const InputDecoration(
-                hintText: '请输入URL如:https://app.bilibili.com',
+          final textController = TextEditingController(text: Pref.apiHKUrl);
+          String? checkText;
+          bool? isAvailable;
+          bool isChecking = false;
+          return StatefulBuilder(
+            onInit: () {
+              textController.selection = TextSelection.collapsed(
+                offset: textController.text.length,
+              );
+            },
+            onDispose: textController.dispose,
+            builder: (context, setDialogState) => AlertDialog(
+              title: const Text('港澳台代理链接'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                spacing: 12,
+                children: [
+                  TextField(
+                    controller: textController,
+                    autofocus: true,
+                    keyboardType: TextInputType.url,
+                    decoration: const InputDecoration(
+                      hintText: '留空清除，或输入根地址如:https://app.bilibili.com',
+                    ),
+                  ),
+                  if (checkText != null)
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        checkText!,
+                        style: TextStyle(
+                          color: isAvailable == null
+                              ? Theme.of(context).colorScheme.outline
+                              : isAvailable!
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).colorScheme.error,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
+                ],
               ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: Get.back,
-                child: Text(
-                  '取消',
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.outline,
+              actions: [
+                TextButton(
+                  onPressed: Get.back,
+                  child: Text(
+                    '取消',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.outline,
+                    ),
                   ),
                 ),
-              ),
-              TextButton(
-                onPressed: () async {
-                  if (!valueStr.isNotEmpty) {
-                    SmartDialog.showToast('代理链接不能为空');
-                    return;
-                  }
-                  if (!valueStr.toLowerCase().startsWith('http')) {
-                    SmartDialog.showToast('代理链接格式错误');
-                    return;
-                  }
+                TextButton(
+                  onPressed: isChecking
+                      ? null
+                      : () async {
+                          final normalized = _normalizeHkProxyUrl(
+                            textController.text,
+                          );
+                          if (normalized == null) {
+                            setDialogState(() {
+                              isAvailable = false;
+                              checkText = '链接格式错误';
+                            });
+                            return;
+                          }
+                          if (normalized.isEmpty) {
+                            setDialogState(() {
+                              isAvailable = null;
+                              checkText = '未填写代理地址';
+                            });
+                            return;
+                          }
 
-                  if (valueStr.toLowerCase().endsWith('/')) {
-                    SmartDialog.showToast('末尾不能有/');
-                    return;
-                  }
-
-                  Get.back();
-                  await GStorage.setting.put(
-                    SettingBoxKey.apiHKUrl,
-                    valueStr,
-                  );
-                  setState();
-                },
-                child: const Text('确定'),
-              ),
-            ],
+                          setDialogState(() {
+                            isChecking = true;
+                            isAvailable = null;
+                            checkText = '检查中...';
+                          });
+                          final result = await HkApi.check(normalized);
+                          if (!context.mounted) return;
+                          setDialogState(() {
+                            isChecking = false;
+                            isAvailable = result.available;
+                            checkText = result.available
+                                ? '可用，${result.latencyMs} ms'
+                                : '不可用${result.latencyMs != null ? '，${result.latencyMs} ms' : ''}：${result.message}';
+                          });
+                        },
+                  child: Text(isChecking ? '检查中...' : '检查'),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    final normalized = _normalizeHkProxyUrl(
+                      textController.text,
+                    );
+                    if (normalized == null) {
+                      SmartDialog.showToast('代理链接格式错误');
+                      return;
+                    }
+                    Get.back();
+                    await GStorage.setting.put(
+                      SettingBoxKey.apiHKUrl,
+                      normalized,
+                    );
+                    setState();
+                  },
+                  child: const Text('确定'),
+                ),
+              ],
+            ),
           );
         },
       );
     },
   ),
 ];
+
+String? _normalizeHkProxyUrl(String value) {
+  final trimmed = value.trim();
+  if (trimmed.isEmpty) {
+    return '';
+  }
+  final uri = Uri.tryParse(trimmed);
+  if (uri == null ||
+      !uri.hasScheme ||
+      (uri.scheme != 'http' && uri.scheme != 'https') ||
+      uri.host.isEmpty) {
+    return null;
+  }
+  if ((uri.path.isNotEmpty && uri.path != '/') ||
+      uri.hasQuery ||
+      uri.hasFragment) {
+    return null;
+  }
+  return '${uri.scheme}://${uri.authority}';
+}
 
 Future<void> audioNormalization(
   BuildContext context,

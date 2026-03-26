@@ -1,4 +1,5 @@
 import 'package:PiliPlus/http/api.dart';
+import 'package:PiliPlus/http/hk_api.dart';
 import 'package:PiliPlus/http/init.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/models/common/pgc_review_type.dart';
@@ -60,10 +61,11 @@ abstract final class PgcHttp {
   static Future<LoadingState<List<PgcIndexItem>?>> pgcIndex({
     int? page,
     int? indexType,
-    required String apiUrl,
+    String? baseUrl,
   }) async {
     var res = await Request().get(
-      apiUrl,
+      Api.pgcIndexResult,
+      baseUrl: baseUrl,
       queryParameters: {
         'st': 1,
         'order': 3,
@@ -95,10 +97,11 @@ abstract final class PgcHttp {
     int types = 1, // 1：`番剧`<br />3：`电影`<br />4：`国创` |
     required int before,
     required int after,
-    required String apiUrl,
+    String? baseUrl,
   }) async {
     var res = await Request().get(
-      apiUrl,
+      Api.pgcTimeline,
+      baseUrl: baseUrl,
       queryParameters: {
         'types': types,
         'before': before,
@@ -248,6 +251,7 @@ abstract final class PgcHttp {
   static Future<LoadingState<Map>> seasonStatus(Object seasonId) async {
     final res = await Request().get(
       Api.seasonStatus,
+      options: HkApi.withFallback(),
       queryParameters: {'season_id': seasonId},
     );
     if (res.data['code'] == 0) {

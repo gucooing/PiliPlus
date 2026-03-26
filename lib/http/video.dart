@@ -5,6 +5,7 @@ import 'package:PiliPlus/grpc/bilibili/main/community/reply/v1.pb.dart'
     show ReplyInfo;
 import 'package:PiliPlus/http/api.dart';
 import 'package:PiliPlus/http/browser_ua.dart';
+import 'package:PiliPlus/http/hk_api.dart';
 import 'package:PiliPlus/http/init.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/http/login.dart';
@@ -230,7 +231,11 @@ abstract final class VideoHttp {
     });
 
     try {
-      final res = await Request().get(videoType.api, queryParameters: params);
+      final res = await Request().get(
+        videoType.api,
+        queryParameters: params,
+        options: videoType == VideoType.pgc ? HkApi.withFallback() : null,
+      );
 
       if (res.data['code'] == 0) {
         late PlayUrlModel data;
@@ -813,6 +818,7 @@ abstract final class VideoHttp {
     assert(aid != null || bvid != null);
     final res = await Request().get(
       Api.playInfo,
+      options: seasonId != null || epId != null ? HkApi.withFallback() : null,
       queryParameters: await WbiSign.makSign({
         'aid': ?aid,
         'bvid': ?bvid,

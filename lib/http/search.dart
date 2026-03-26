@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:PiliPlus/http/api.dart';
+import 'package:PiliPlus/http/hk_api.dart';
 import 'package:PiliPlus/http/init.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/models/common/search/search_type.dart';
@@ -11,7 +12,6 @@ import 'package:PiliPlus/models_new/pgc/pgc_info_model/result.dart';
 import 'package:PiliPlus/models_new/search/search_rcmd/data.dart';
 import 'package:PiliPlus/models_new/search/search_trending/data.dart';
 import 'package:PiliPlus/utils/request_utils.dart';
-import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/wbi_sign.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -58,9 +58,15 @@ abstract final class SearchHttp {
     String? gaiaVtoken,
     required ValueChanged<String> onSuccess,
   }) async {
-    String api = Api.searchByType;
+    final effectiveSearchType = searchType == SearchType.media_hk_bangumi
+        ? SearchType.media_bangumi
+        : searchType;
+    final bool useHkBaseUrl = searchType == SearchType.media_hk_bangumi;
+    if (useHkBaseUrl && !HkApi.isConfigured) {
+      return const Error('请在 设置-其他设置-港澳台代理 中设置代理服务器');
+    }
     var params = await WbiSign.makSign({
-      'search_type': searchType.name,
+      'search_type': effectiveSearchType.name,
       'keyword': keyword,
       'page': page,
       if (order != null && order.isNotEmpty) 'order': order,
@@ -76,22 +82,16 @@ abstract final class SearchHttp {
       'web_location': 1430654,
       'gaia_vtoken': ?gaiaVtoken,
     });
-    if (searchType == SearchType.media_hk_bangumi) {
-      if (Pref.apiHKUrl.isEmpty) {
-        return const Error('请在 设置-其他设置-港澳台代理 中设置代理服务器');
-      }
-      params['search_type'] = SearchType.media_bangumi.name;
-      api = Pref.apiHKUrl + Api.searchByType;
-    }
     var res = await Request().get(
-      api,
+      Api.searchByType,
+      baseUrl: useHkBaseUrl ? HkApi.baseUrl : null,
       queryParameters: params,
       options: Options(
         headers: {
           if (gaiaVtoken != null) 'cookie': 'x-bili-gaia-vtoken=$gaiaVtoken',
           'origin': 'https://search.bilibili.com',
           'referer':
-              'https://search.bilibili.com/${searchType.name}?keyword=${Uri.encodeFull(keyword)}',
+              'https://search.bilibili.com/${effectiveSearchType.name}?keyword=${Uri.encodeFull(keyword)}',
         },
       ),
     );
@@ -116,7 +116,9 @@ abstract final class SearchHttp {
             case SearchType.bili_user:
               data = SearchUserData.fromJson(dataData);
               break;
-            case SearchType.media_bangumi || SearchType.media_ft || SearchType.media_hk_bangumi:
+            case SearchType.media_bangumi ||
+                SearchType.media_ft ||
+                SearchType.media_hk_bangumi:
               data = SearchPgcData.fromJson(dataData);
               break;
             case SearchType.article:
@@ -209,6 +211,7 @@ abstract final class SearchHttp {
   }) async {
     final res = await Request().get(
       Api.pgcInfo,
+      options: HkApi.withFallback(),
       queryParameters: {
         'season_id': ?seasonId,
         'ep_id': ?epId,
