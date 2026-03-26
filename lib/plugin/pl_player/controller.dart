@@ -219,7 +219,7 @@ class PlPlayerController with BlockConfigMixin {
 
   Future<void> exitDesktopPip() {
     isDesktopPip = false;
-    await Future.wait([
+    return Future.wait([
       if (showWindowTitleBar)
       windowManager.setTitleBarStyle(TitleBarStyle.normal),
       windowManager.setMinimumSize(const Size(140, 140)),
