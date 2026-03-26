@@ -28,6 +28,7 @@ try {
 
     $versionName = "${baseVersion}_$shortHash"
     $releaseVersion = "$versionName+$versionCode"
+    $packageVersion = "${baseVersion}+git.$shortHash.$versionCode"
 
     $buildTime = [int]([DateTimeOffset]::Now.ToUnixTimeSeconds())
 
@@ -42,6 +43,7 @@ try {
 
     if ($env:GITHUB_ENV) {
         Add-Content -Path $env:GITHUB_ENV -Value "version=$releaseVersion"
+        Add-Content -Path $env:GITHUB_ENV -Value "package_version=$packageVersion"
     }
 }
 catch {

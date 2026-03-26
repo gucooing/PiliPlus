@@ -80,7 +80,7 @@ jobs:
 
           printf "修改控制文件...\n"
           # 替换版本号
-          sed -i  "2s/version_need_change/${{ env.version }}/g" DEBIAN/control
+          sed -i  "2s/version_need_change/${{ env.package_version }}/g" DEBIAN/control
           # 计算安装大小并替换
           SIZE_KB=$(du -s -b --apparent-size . | awk '{print int($1)}')
           SIZE_KB=$(($SIZE_KB - $(du -s -b --apparent-size DEBIAN | awk '{print int($1)}')))
@@ -124,7 +124,7 @@ jobs:
           printf "生成 spec 文件...\n"
           cat > "$RPM_BUILD_ROOT/SPECS/piliplus.spec" <<EOF
           Name:           piliplus
-          Version:        ${{ env.version }}
+          Version:        ${{ env.package_version }}
           Release:        1%{?dist}
           Summary:        PiliPlus Linux Version
           License:        GPL-3.0
@@ -170,7 +170,7 @@ jobs:
           /usr/share/icons/hicolor/512x512/apps/piliplus.png
 
           %changelog
-          * DATE - ${{ env.version }}-1
+          * DATE - ${{ env.package_version }}-1
           - Initial RPM release
           EOF
 
