@@ -193,7 +193,9 @@ abstract final class Pref {
   static FullScreenMode get fullScreenMode =>
       FullScreenMode.values[_setting.get(
         SettingBoxKey.fullScreenMode,
-        defaultValue: FullScreenMode.auto.index,
+        defaultValue: horizontalScreen
+            ? FullScreenMode.none.index
+            : FullScreenMode.auto.index,
       )];
 
   static BtmProgressBehavior get btmProgressBehavior =>
@@ -639,9 +641,6 @@ abstract final class Pref {
   static bool get enableBackgroundPlay =>
       _setting.get(SettingBoxKey.enableBackgroundPlay, defaultValue: true);
 
-  static bool get allowRotateScreen =>
-      _setting.get(SettingBoxKey.allowRotateScreen, defaultValue: true);
-
   static bool get disableLikeMsg =>
       _setting.get(SettingBoxKey.disableLikeMsg, defaultValue: false);
 
@@ -969,4 +968,7 @@ abstract final class Pref {
 
   static bool get saveReply =>
       _setting.get(SettingBoxKey.saveReply, defaultValue: true);
+
+  static bool get floatingNavBar =>
+      _setting.get(SettingBoxKey.floatingNavBar, defaultValue: false);
 }

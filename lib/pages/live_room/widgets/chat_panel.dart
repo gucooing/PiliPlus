@@ -2,7 +2,6 @@ import 'package:PiliPlus/common/widgets/flutter/popup_menu.dart';
 import 'package:PiliPlus/common/widgets/gesture/tap_gesture_recognizer.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/http/live.dart';
-import 'package:PiliPlus/models/common/image_type.dart';
 import 'package:PiliPlus/models_new/live/live_danmaku/danmaku_msg.dart';
 import 'package:PiliPlus/models_new/live/live_superchat/item.dart';
 import 'package:PiliPlus/pages/live_room/controller.dart';
@@ -241,14 +240,20 @@ class LiveRoomChatPanel extends StatelessWidget {
   InlineSpan _buildMsg(double devicePixelRatio, DanmakuMsg obj) {
     final uemote = obj.uemote;
     if (uemote != null) {
-      // "room_{{room_id}}_{{int}}" or "upower_[{{emote}}]"
-      final isUpower = uemote.isUpower;
+      // "room_{{room_id}}_{{int}}" , "upower_[{{emote}}]" , "official_{{int}}"
+      final double width, height;
+      if (uemote.isOfficial) {
+        width = uemote.width / devicePixelRatio;
+        height = uemote.height / devicePixelRatio;
+      } else {
+        width = height = 162.0 / devicePixelRatio;
+      }
       return WidgetSpan(
         child: NetworkImgLayer(
           src: uemote.url,
-          type: ImageType.emote,
-          width: isUpower ? uemote.width : uemote.width / devicePixelRatio,
-          height: isUpower ? uemote.height : uemote.height / devicePixelRatio,
+          type: .emote,
+          width: width,
+          height: height,
         ),
       );
     }
@@ -265,7 +270,7 @@ class LiveRoomChatPanel extends StatelessWidget {
             WidgetSpan(
               child: NetworkImgLayer(
                 src: emote.url,
-                type: ImageType.emote,
+                type: .emote,
                 width: emote.width,
                 height: emote.height,
               ),

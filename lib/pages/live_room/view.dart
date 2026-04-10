@@ -30,7 +30,6 @@ import 'package:PiliPlus/pages/video/widgets/player_focus.dart';
 import 'package:PiliPlus/plugin/pl_player/controller.dart';
 import 'package:PiliPlus/plugin/pl_player/models/play_status.dart';
 import 'package:PiliPlus/plugin/pl_player/utils/danmaku_options.dart';
-import 'package:PiliPlus/plugin/pl_player/utils/fullscreen.dart';
 import 'package:PiliPlus/plugin/pl_player/view/view.dart';
 import 'package:PiliPlus/services/service_locator.dart';
 import 'package:PiliPlus/utils/extension/num_ext.dart';
@@ -92,6 +91,7 @@ class _LiveRoomPageState extends State<LiveRoomPage>
     maxWidth = size.width;
     maxHeight = size.height;
     isPortrait = size.isPortrait;
+    plPlayerController.screenRatio = maxHeight / maxWidth;
   }
 
   @override
@@ -169,19 +169,12 @@ class _LiveRoomPageState extends State<LiveRoomPage>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
+    if (plPlayerController.visible = state == .resumed) {
       if (!plPlayerController.showDanmaku) {
         _liveRoomController.startLiveTimer();
         plPlayerController.showDanmaku = true;
-        if (isFullScreen && Platform.isIOS) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (!_liveRoomController.isPortrait.value) {
-              landscape();
-            }
-          });
-        }
       }
-    } else if (state == AppLifecycleState.paused) {
+    } else if (state == .paused) {
       _liveRoomController.cancelLiveTimer();
       plPlayerController
         ..showDanmaku = false
@@ -831,7 +824,7 @@ class _LiveRoomPageState extends State<LiveRoomPage>
                             ),
                           ),
                           Positioned(
-                            right: -12,
+                            left: 30,
                             top: -12,
                             child: Obx(() {
                               final likeClickTime =

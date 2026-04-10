@@ -61,7 +61,6 @@ import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
-import 'package:auto_orientation/auto_orientation.dart';
 import 'package:extended_nested_scroll_view/extended_nested_scroll_view.dart';
 import 'package:floating/floating.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
@@ -162,7 +161,6 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     }
 
     videoSourceInit();
-    autoScreen();
 
     addObserverMobile(this);
   }
@@ -184,29 +182,14 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    late final ctr = videoDetailController.plPlayerController;
-    if (state == AppLifecycleState.resumed) {
+    final isResume = state == .resumed;
+    final ctr = videoDetailController.plPlayerController..visible = isResume;
+    if (isResume) {
       if (!ctr.showDanmaku) {
         introController.startTimer();
         ctr.showDanmaku = true;
-
-        // 修复从后台恢复时全屏状态下屏幕方向错误的问题
-        if (isFullScreen && Platform.isIOS) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            // 根据视频方向重新设置屏幕方向
-            final isVertical = videoDetailController.isVertical.value;
-            final mode = ctr.mode;
-
-            if (!(mode == FullScreenMode.vertical ||
-                (mode == FullScreenMode.auto && isVertical) ||
-                (mode == FullScreenMode.ratio &&
-                    (isVertical || maxHeight / maxWidth < kScreenRatio)))) {
-              landscape();
-            }
-          });
-        }
       }
-    } else if (state == AppLifecycleState.paused) {
+    } else if (state == .paused) {
       introController.cancelTimer();
       ctr.showDanmaku = false;
     }
@@ -362,9 +345,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
         pgcIntroController.cancelTimer();
       }
     }
-    if (!videoDetailController.horizontalScreen) {
-      AutoOrientation.portraitUpMode();
-    }
+
     if (!videoDetailController.plPlayerController.isCloseAll) {
       videoPlayerServiceHandler?.onVideoDetailDispose(heroTag);
       if (plPlayerController != null) {
@@ -414,7 +395,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   void didPopNext() {
     super.didPopNext();
 
-    if (plPlayerController?.isCloseAll ?? false) {
+    if (videoDetailController.plPlayerController.isCloseAll) {
       return;
     }
 
@@ -472,6 +453,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     final size = MediaQuery.sizeOf(context);
     maxWidth = size.width;
     maxHeight = size.height;
+    videoDetailController.plPlayerController.screenRatio = maxHeight / maxWidth;
 
     final shortestSide = size.shortestSide;
     final minVideoHeight = shortestSide / Style.aspectRatio16x9;
@@ -528,34 +510,6 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     videoDetailController.animationController
       ..removeListener(animListener)
       ..addListener(animListener);
-    if (PlatformUtils.isMobile && mounted && isShowing && !isFullScreen) {
-      if (isPortrait) {
-        showStatusBar();
-      } else if (!videoDetailController.horizontalScreen) {
-        hideStatusBar();
-      }
-    }
-    if (PlatformUtils.isMobile) {
-      if (!isPortrait &&
-          !isFullScreen &&
-          plPlayerController != null &&
-          videoDetailController.autoPlay) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          plPlayerController!.triggerFullScreen(
-            status: true,
-            isManualFS: false,
-            mode: FullScreenMode.gravity,
-          );
-        });
-      } else if (isPortrait &&
-          isFullScreen &&
-          plPlayerController?.isManualFS == false &&
-          plPlayerController?.controlsLock.value == false) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          plPlayerController!.triggerFullScreen(status: false);
-        });
-      }
-    }
     return Obx(
       () {
         final isFullScreen = this.isFullScreen;
@@ -701,15 +655,9 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                                                     .colorScheme
                                                     .onSurface,
                                               ),
-                                              onPressed: () {
-                                                videoDetailController
-                                                    .plPlayerController
-                                                  ..isCloseAll = true
-                                                  ..dispose();
-                                                Get.until(
-                                                  (route) => route.isFirst,
-                                                );
-                                              },
+                                              onPressed: videoDetailController
+                                                  .plPlayerController
+                                                  .onCloseAll,
                                             ),
                                           ),
                                         ],
@@ -1239,12 +1187,8 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                           ),
                         ],
                       ),
-                      onPressed: () {
-                        videoDetailController.plPlayerController
-                          ..isCloseAll = true
-                          ..dispose();
-                        Get.until((route) => route.isFirst);
-                      },
+                      onPressed:
+                          videoDetailController.plPlayerController.onCloseAll,
                     ),
                   ),
                 ],
@@ -1338,7 +1282,8 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
         !isFullScreen &&
         !videoDetailController.plPlayerController.isDesktopPip &&
         (videoDetailController.horizontalScreen || isPortrait),
-    onPopInvokedWithResult: _onPopInvokedWithResult,
+    onPopInvokedWithResult:
+        videoDetailController.plPlayerController.onPopInvokedWithResult,
     child: Obx(
       () =>
           !videoDetailController.videoState.value ||
@@ -2170,17 +2115,6 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
           plPlayerController: plPlayerController,
         ),
       );
-    }
-  }
-
-  void _onPopInvokedWithResult(bool didPop, result) {
-    if (plPlayerController?.onPopInvokedWithResult(didPop, result) ?? false) {
-      return;
-    }
-    if (PlatformUtils.isMobile &&
-        !videoDetailController.horizontalScreen &&
-        !isPortrait) {
-      verticalScreenForTwoSeconds();
     }
   }
 

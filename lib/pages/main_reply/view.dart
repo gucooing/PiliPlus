@@ -239,6 +239,7 @@ class _MainReplyPageState extends State<MainReplyPage>
               isVideoDetail: false,
               replyType: _controller.replyType,
               firstFloor: replyItem,
+              upMid: _controller.upMid,
             ),
           ).constraintWidth(),
         ),
