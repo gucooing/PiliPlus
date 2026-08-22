@@ -10,7 +10,6 @@ import 'package:PiliPlus/common/widgets/gesture/horizontal_drag_gesture_recogniz
 import 'package:PiliPlus/common/widgets/image_grid/image_grid_view.dart'
     show ImageGridView, ImageModel;
 import 'package:PiliPlus/common/widgets/pendant_avatar.dart';
-import 'package:PiliPlus/common/widgets/stateful_builder.dart';
 import 'package:PiliPlus/grpc/reply.dart';
 import 'package:PiliPlus/http/fav.dart';
 import 'package:PiliPlus/http/hk_api.dart';
@@ -620,126 +619,7 @@ List<SettingsModel> get extraSettings => [
       final url = Pref.apiHKUrl;
       return '当前港澳台代理配置: 「${url == '' ? '不代理' : Pref.apiHKUrl}」';
     },
-
-    onTap: (context, setState) {
-      showDialog(
-        context: context,
-        builder: (context) {
-          final textController = TextEditingController(text: Pref.apiHKUrl);
-          String? checkText;
-          bool? isAvailable;
-          bool isChecking = false;
-          return StatefulBuilder(
-            onInit: () {
-              textController.selection = TextSelection.collapsed(
-                offset: textController.text.length,
-              );
-            },
-            onDispose: textController.dispose,
-            builder: (context, setDialogState) => AlertDialog(
-              title: const Text('港澳台代理链接'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                spacing: 12,
-                children: [
-                  TextField(
-                    controller: textController,
-                    autofocus: true,
-                    keyboardType: TextInputType.url,
-                    decoration: const InputDecoration(
-                      hintText: '留空清除，或输入根地址如:https://app.bilibili.com',
-                    ),
-                  ),
-                  if (checkText != null)
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        checkText!,
-                        style: TextStyle(
-                          color: isAvailable == null
-                              ? Theme.of(context).colorScheme.outline
-                              : isAvailable!
-                              ? Theme.of(context).colorScheme.primary
-                              : Theme.of(context).colorScheme.error,
-                          fontSize: 13,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: Get.back,
-                  child: Text(
-                    '取消',
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.outline,
-                    ),
-                  ),
-                ),
-                TextButton(
-                  onPressed: isChecking
-                      ? null
-                      : () async {
-                          final normalized = _normalizeHkProxyUrl(
-                            textController.text,
-                          );
-                          if (normalized == null) {
-                            setDialogState(() {
-                              isAvailable = false;
-                              checkText = '链接格式错误';
-                            });
-                            return;
-                          }
-                          if (normalized.isEmpty) {
-                            setDialogState(() {
-                              isAvailable = null;
-                              checkText = '未填写代理地址';
-                            });
-                            return;
-                          }
-
-                          setDialogState(() {
-                            isChecking = true;
-                            isAvailable = null;
-                            checkText = '检查中...';
-                          });
-                          final result = await HkApi.check(normalized);
-                          if (!context.mounted) return;
-                          setDialogState(() {
-                            isChecking = false;
-                            isAvailable = result.available;
-                            checkText = result.available
-                                ? '可用，${result.latencyMs} ms'
-                                : '不可用${result.latencyMs != null ? '，${result.latencyMs} ms' : ''}：${result.message}';
-                          });
-                        },
-                  child: Text(isChecking ? '检查中...' : '检查'),
-                ),
-                TextButton(
-                  onPressed: () async {
-                    final normalized = _normalizeHkProxyUrl(
-                      textController.text,
-                    );
-                    if (normalized == null) {
-                      SmartDialog.showToast('代理链接格式错误');
-                      return;
-                    }
-                    Get.back();
-                    await GStorage.setting.put(
-                      SettingBoxKey.apiHKUrl,
-                      normalized,
-                    );
-                    setState();
-                  },
-                  child: const Text('确定'),
-                ),
-              ],
-            ),
-          );
-        },
-      );
-    },
+    onTap: _showHkProxyDialog,
   ),
 ];
 
@@ -1368,4 +1248,111 @@ void _showCacheDialog(BuildContext context, VoidCallback setState) {
       ],
     ),
   );
+}
+
+void _showHkProxyDialog(BuildContext context, VoidCallback setState) {
+  final textController = TextEditingController(text: Pref.apiHKUrl);
+  String? checkText;
+  bool? isAvailable;
+  bool isChecking = false;
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('港澳台代理链接'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        spacing: 12,
+        children: [
+          TextField(
+            controller: textController,
+            autofocus: true,
+            keyboardType: TextInputType.url,
+            decoration: const InputDecoration(
+              hintText: '留空清除，或输入根地址如:https://app.bilibili.com',
+            ),
+          ),
+          if (checkText != null)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                checkText!,
+                style: TextStyle(
+                  color: isAvailable == null
+                      ? Theme.of(context).colorScheme.outline
+                      : isAvailable!
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(context).colorScheme.error,
+                  fontSize: 13,
+                ),
+              ),
+            ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: Get.back,
+          child: Text(
+            '取消',
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.outline,
+            ),
+          ),
+        ),
+        TextButton(
+          onPressed: isChecking
+              ? null
+              : () async {
+                  final normalized = _normalizeHkProxyUrl(
+                    textController.text,
+                  );
+                  if (normalized == null) {
+                    isAvailable = false;
+                    checkText = '链接格式错误';
+                    (context as Element).markNeedsBuild();
+                    return;
+                  }
+                  if (normalized.isEmpty) {
+                    isAvailable = null;
+                    checkText = '未填写代理地址';
+                    (context as Element).markNeedsBuild();
+                    return;
+                  }
+
+                  isChecking = true;
+                  isAvailable = null;
+                  checkText = '检查中...';
+                  (context as Element).markNeedsBuild();
+
+                  final result = await HkApi.check(normalized);
+                  if (!context.mounted) return;
+                  isChecking = false;
+                  isAvailable = result.available;
+                  checkText = result.available
+                      ? '可用，${result.latencyMs} ms'
+                      : '不可用${result.latencyMs != null ? '，${result.latencyMs} ms' : ''}：${result.message}';
+                  (context).markNeedsBuild();
+                },
+          child: Text(isChecking ? '检查中...' : '检查'),
+        ),
+        TextButton(
+          onPressed: () async {
+            final normalized = _normalizeHkProxyUrl(
+              textController.text,
+            );
+            if (normalized == null) {
+              SmartDialog.showToast('代理链接格式错误');
+              return;
+            }
+            Get.back();
+            await GStorage.setting.put(
+              SettingBoxKey.apiHKUrl,
+              normalized,
+            );
+            setState();
+          },
+          child: const Text('确定'),
+        ),
+      ],
+    ),
+  ).whenComplete(textController.dispose);
 }
