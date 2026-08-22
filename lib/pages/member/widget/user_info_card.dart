@@ -3,7 +3,8 @@ import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/common/widgets/avatars.dart';
 import 'package:PiliPlus/common/widgets/image_viewer/hero.dart';
 import 'package:PiliPlus/common/widgets/pendant_avatar.dart';
-import 'package:PiliPlus/common/widgets/scroll_physics.dart';
+import 'package:PiliPlus/common/widgets/scroll_physics.dart'
+    show tabBarScrollPhysics;
 import 'package:PiliPlus/common/widgets/selection_text.dart';
 import 'package:PiliPlus/common/widgets/view_safe_area.dart';
 import 'package:PiliPlus/models/common/image_preview_type.dart';
@@ -39,9 +40,9 @@ import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
-import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
+import 'package:material_ui/material_ui.dart';
 
 class UserInfoCard extends StatelessWidget {
   const UserInfoCard({
@@ -395,6 +396,7 @@ class UserInfoCard extends StatelessWidget {
   }
 
   Column _buildRight(ColorScheme colorScheme) => Column(
+    spacing: 5,
     mainAxisSize: .min,
     children: [
       Row(
@@ -418,7 +420,6 @@ class UserInfoCard extends StatelessWidget {
             .skip(1)
             .toList(),
       ),
-      const SizedBox(height: 5),
       Row(
         spacing: 10,
         mainAxisSize: .min,
@@ -441,22 +442,25 @@ class UserInfoCard extends StatelessWidget {
                 }
               },
               icon: const Icon(Icons.mail_outline, size: 21),
-              style: IconButton.styleFrom(
-                side: BorderSide(
-                  width: 1.0,
-                  color: colorScheme.outline.withValues(alpha: 0.3),
+              style: ButtonStyle(
+                side: WidgetStatePropertyAll(
+                  BorderSide(
+                    width: 1.0,
+                    color: colorScheme.outline.withValues(alpha: 0.3),
+                  ),
                 ),
-                padding: .zero,
-                tapTargetSize: .padded,
+                padding: const WidgetStatePropertyAll(.zero),
+                tapTargetSize: .shrinkWrap,
                 visualDensity: .compact,
               ),
             ),
           Expanded(
             child: FilledButton.tonal(
               onPressed: !isOwner && relation == -1 ? null : onFollow,
-              style: FilledButton.styleFrom(
+              style: ButtonStyle(
+                padding: const WidgetStatePropertyAll(.zero),
                 backgroundColor: relation != 0
-                    ? colorScheme.onInverseSurface
+                    ? WidgetStatePropertyAll(colorScheme.onInverseSurface)
                     : null,
                 tapTargetSize: .padded,
                 visualDensity: const VisualDensity(vertical: -1.8),
@@ -632,7 +636,7 @@ class UserInfoCard extends StatelessWidget {
             child: PageView.builder(
               controller: controller,
               itemCount: imgUrls.length,
-              physics: clampingScrollPhysics,
+              physics: tabBarScrollPhysics,
               itemBuilder: (context, index) {
                 final img = imgUrls[index];
                 return fromHero(
