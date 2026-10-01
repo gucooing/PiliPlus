@@ -1,11 +1,10 @@
-import 'dart:io' show Platform, Process;
-
 import 'package:PiliPlus/models/common/video/video_type.dart';
 import 'package:PiliPlus/pages/common/multi_select/base.dart'
     show MultiSelectData;
 import 'package:PiliPlus/utils/page_utils.dart';
+import 'package:PiliPlus/utils/path_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
-import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
+import 'package:PiliPlus/utils/utils.dart';
 import 'package:get/route_manager.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -46,7 +45,7 @@ class BiliDownloadEntryInfo with MultiSelectData {
 
   String get pageId => seasonId ?? avid.toString();
 
-  int get sortKey => ep?.sortIndex ?? pageData!.cid;
+  int get sortKey => ep?.sortIndex ?? pageData!.page;
 
   String get showTitle {
     if (pageData case PageInfo(:final part)) {
@@ -103,23 +102,13 @@ class BiliDownloadEntryInfo with MultiSelectData {
           PopupMenuItem(
             height: 38,
             child: const Text('打开本地文件夹', style: TextStyle(fontSize: 13)),
-            onTap: () async {
-              try {
-                final String executable;
-                if (Platform.isWindows) {
-                  executable = 'explorer';
-                } else if (Platform.isMacOS) {
-                  executable = 'open';
-                } else if (Platform.isLinux) {
-                  executable = 'xdg-open';
-                } else {
-                  throw UnimplementedError();
-                }
-                await Process.run(executable, [entryDirPath]);
-              } catch (e) {
-                SmartDialog.showToast(e.toString());
-              }
-            },
+            onTap: () => PathUtils.openDir(entryDirPath),
+          )
+        else
+          PopupMenuItem(
+            height: 38,
+            child: const Text('复制缓存路径', style: TextStyle(fontSize: 13)),
+            onTap: () => Utils.copyText(entryDirPath),
           ),
         if (ownerId case final mid?)
           PopupMenuItem(
